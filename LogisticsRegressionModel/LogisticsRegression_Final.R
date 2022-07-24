@@ -1,4 +1,4 @@
-# Phân tích khách hang nào có tiền gửi va đặt tiền gửi 
+# Phân tích khách hàng nào có tiền gửi và đặt tiền gửi 
 library(tidyverse)
 library(mlbench)
 library(gmodels)
