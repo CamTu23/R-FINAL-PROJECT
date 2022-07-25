@@ -57,10 +57,14 @@ monthplot(train_airpassengers, xlab="Month", ylab="Passenger", main="Month Plot"
 seasonplot(train_airpassengers, year.labels="TRUE", main="Season Plot", col = 1:11) # tăng dần theo năm
 
 # Kiểm tra dữ liệu có dừng không?
-acf(diff(log_train_airpassenger)) # q
-pacf(diff(log_train_airpassenger)) # p
+
 adf.test(diff(log_train_airpassenger)) # 0.01 smaller -> non-stationary  
 kpss.test(diff(log_train_airpassenger)) # 0.1 > -> non - stationary
 
+#CHUYỂN DỮ LIỆU VỀ DỪNG
+
+#KIỂM ĐỊNH TỰ TƯƠNG QUAN
+acf(diff(log_train_airpassenger)) # q
+pacf(diff(log_train_airpassenger)) # p
 #Create model
 arima_model_air = auto.arima(diff(log_train_airpassenger), ic = "aic", trace = TRUE)
