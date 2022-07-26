@@ -58,9 +58,9 @@ fig(12, 8)
 #ggplot(train.dl, aes(age,color = y)) + geom_histogram(binwidth = 5, color = "black",fill = "green") + theme(text = element_text(size=10))
 ggplot(data = train.dl, aes(age, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$age)
-fig(20, 8)
+fig(12, 8)
 #ggplot(train.dl, aes(balance)) + geom_area(stat = "bin", color = "black",fill = "cyan2",alpha = 0.5) + theme(text = element_text(size=10))
-ggplot(data = train.dl, aes(balance, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
+ggplot(data = train.dl, aes(balance, color = y))+ geom_freqpoly(binwidth = 1000, size = 1)
 summary(train.dl$balance)
 fig(20, 8)
 #ggplot(train.dl, aes(duration)) + geom_area(stat = "bin", color = "black",fill = "pink2", alpha = 0.5) + theme(text = element_text(size=10))
@@ -70,14 +70,25 @@ fig(20, 8)
 ggplot(data = train.dl, aes(campaign, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$campaign)
 fig(20, 8)
-ggplot(train.dl, aes(day)) + geom_area(stat = "bin", color = "black",fill = "slateblue1", alpha = 0.5) + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(day, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$day)
 fig(20, 8)
-ggplot(train.dl, aes(pdays)) + geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "deepskyblue3") + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(pdays, color = y))+ geom_freqpoly(binwidth =100, size = 1)
 summary(train.dl$pdays)
 fig(20, 8)
-ggplot(train.dl, aes(previous))+ geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "brown") + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(previous, color = y))+ geom_freqpoly(binwidth = 100, size = 1)
 summary(train.dl$previous)
+
+
+# fig(20, 8)
+# ggplot(train.dl, aes(day)) + geom_area(stat = "bin", color = "black",fill = "slateblue1", alpha = 0.5) + theme(text = element_text(size=10))
+# summary(train.dl$day)
+# fig(20, 8)
+# ggplot(train.dl, aes(pdays)) + geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "deepskyblue3") + theme(text = element_text(size=10))
+# summary(train.dl$pdays)
+# fig(20, 8)
+# ggplot(train.dl, aes(previous))+ geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "brown") + theme(text = element_text(size=10))
+# summary(train.dl$previous)
 
 train.dl %>%
   dplyr::select (age,balance,duration,campaign,day,pdays,previous) %>%
@@ -118,10 +129,12 @@ head(lr.df)
 summary(lr.df)
 ##tạo các cột giả (nhị phân) từ các cột kiểu ký tự
 library(fastDummies)
+
 lr.df = dummy_cols(lr.df, select_columns = c("job","marital","education","contact","month","poutcome"))
 head(lr.df)
 #options(max.print=5000)
 str(lr.df)
+
 #Xoa cot chu Dl 
 lr.df <- lr.df[,-c(2,3,4,9,11,16,18,24,27,29,30,40,47)]
 head(lr.df)
@@ -159,13 +172,14 @@ train.set %>%
 test.set %>%
   summarise(Total = n())
 
+
 ####Build Logit Models and Predict 
 #mô hình hồi quy Logistic trên tất cả các biến 
 
 #xây dựng mô hình dựu báo trên bộ mẫu train.set
 logit_reg =glm(y ~ ., data = train.set,family = binomial(link = "logit"))
 summary(logit_reg) #chẩn đoán mô hình 
-vif(logit_reg)
+
 #dự báo trên bộ train.set 
 Prediction_train = predict(logit_reg, newdata =  train.set, type = "response")
 summary(Prediction_train)
