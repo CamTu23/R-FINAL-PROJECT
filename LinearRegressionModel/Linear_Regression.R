@@ -219,14 +219,22 @@ ggplot(data = data_test, aes(x = prediction, y = residuals)) + geom_pointrange(a
 # cũng như chart trên
 GainCurvePlot(data_test, "prediction", "charges", "Model")
 # đường giá trị thực nằm trên giá trị dự đoán
-
+# predict với giá trị thực
 Tu <- data.frame(age = 20,
                   bmi = 27.9,
                   sex = 'female',
                   children = 0,
                   smoker = "yes",
                   region = "northwest")
-print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2)))
+print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #25345.68
+# giá trị thực 2
+Tu <- data.frame(age = 20,
+                 bmi = 27.9,
+                 sex = 'female',
+                 children = 0,
+                 smoker = "no",
+                 region = "northwest")
+print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #2576.62
 
 
 
