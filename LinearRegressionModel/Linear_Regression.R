@@ -6,8 +6,11 @@ library(plotly) #make a pie chart
 library(Metrics) #find error value
 library(Hmisc)
 library(cowplot)
+
 library(WVPlots)
+
 library(pearson7)
+library(reshape2)
 #Load file
 data_insurance <- read.csv("./DATA/insurance.csv")
 
@@ -29,6 +32,13 @@ ggplot(data_insurance, aes(smoker, charges, colour= smoker)) + geom_jitter(alpha
 
 #Correlation charge and Region
 ggplot(data_insurance, aes(region, charges, colour= region)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between region and charges")
+
+# data_insurance$sex = as.factor(data_insurance$sex)
+# data_insurance$smoker = as.factor(data_insurance$smoker)
+# data_insurance$region = as.factor(data_insurance$region)
+# data_insurance_2 <- melt(data_insurance)
+# head(data_insurance_2)
+# ggplot(data = data_insurance, aes(x=, y=, fill=value)) + geom_tile()
 
 #Sau khi biểu diễn độ tương quan giữa charges và các biến thì ta thấy rằng:
 # - Đối với children, ngoại trừ không có trẻ em thì có mật độ giống nhau. Chưa có con sẽ ảnh hưởng đến chi phí bảo hiểm
@@ -84,7 +94,7 @@ data_test <- data_insurance[-train_indices, ]
 
 
 #da bien
-formula_1 <- as.formula("charges ~ age + bmi + children + smoker")
+formula_1 <- as.formula("charges ~ age + bmi + smoker")
 model_1 <- lm(formula_1, data = data_train)
 summary(model_1) # Y = -12130.4 + 257.2*X1 + 326.2*X2 + 514.3*X3 + 23576.1*X4 
 
@@ -98,6 +108,14 @@ summary(model_1) # Y = -12130.4 + 257.2*X1 + 326.2*X2 + 514.3*X3 + 23576.1*X4
 formula_2 <- as.formula("charges ~ smoker")
 model_2 <- lm(formula_2, data = data_train)
 summary(model_2)
+
+formula_3 <- as.formula("charges ~ age")
+model_3 <- lm(formula_3, data = data_train)
+summary(model_3)
+
+formula_4 <- as.formula("charges ~ bmi")
+model_4 <- lm(formula_4, data = data_train)
+summary(model_4)
 
 
 # #Cat - 1: Smoker, have no dependent, BMI under 30.
@@ -188,24 +206,6 @@ summary(model_2)
 # summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.2944
 # # Từ hai bản tóm tắt đó, tôi quyết định sử dụng hồi quy tuyến tính với 1 biến (tuổi) vì nó có giá trị R-Squared tốt hơn.
 # # -2161.36 + (282.54 * AGE)
-# 
-# # chốt đa là biến age, bmi
-# # Chốt đơn biến là age
-# 
-# 
-# # Split data to train and test
-# train <- round(0.8 * nrow(data_insurance))
-# # từ dataet gốc, lấy 80% bộ dữ liệu -> train_indices
-# train_indices <- sample(1:nrow(data_insurance),train)
-# #sau khi có train_indices, lúc này vẫn chưa là 1 bảng -> phải chuyển đổi thành bảng
-# data_train <- data_insurance[train_indices, ]
-# #phần còn lại 20% là test
-# data_test <- data_insurance[-train_indices, ]
-# 
-# 
-# # Xây dựng model
-# summary(lm(charges ~ age, data = data_train)) # Insurance_cost = 3165.9 + 257.7*age
-# summary(lm(charges ~ age + bmi, data = data_train)) # Insurance_cost = -6424.8 + 241.93*age + 332.97*bmi
 
 # Model Performance 
 # Prediction vs. Real values hình 1
@@ -215,6 +215,7 @@ ggplot(data_test, aes(prediction, charges)) + geom_point(color = "blue", alpha =
 # Dự đoán hình 2
 data_test$residuals <- data_test$charges - data_test$prediction
 ggplot(data = data_test, aes(x = prediction, y = residuals)) + geom_pointrange(aes(ymin = 0, ymax = residuals), color = "blue", alpha = 0.7) + geom_hline(yintercept = 0, linetype = 3, color = "red") + ggtitle("Residuals vs. Linear model prediction")
+
 # cũng như chart trên
 GainCurvePlot(data_test, "prediction", "charges", "Model")
 # đường giá trị thực nằm trên giá trị dự đoán
