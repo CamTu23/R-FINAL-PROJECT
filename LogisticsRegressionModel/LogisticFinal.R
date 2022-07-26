@@ -6,6 +6,7 @@ library(corrplot)
 library(caret)
 library(MASS)
 library(tidyverse)
+
 library(mlbench)
 library(gmodels)
 library(class)
@@ -14,20 +15,23 @@ library(epiDisplay)
 library(DescTools)
 library(rms)
 library(ROCR)
-
 library(InformationValue)
 library(glmnet)
 
 
-
 library(readr)
-DL <- read_csv("DATA/DL.csv")
+f <- file.choose() # chọn file AirPassengers.csv trong thư mục DATA 
+DL <- read.csv(f) 
 train.dl <- DL
 train.dl <- data.frame(train.dl)
+
 str(train.dl)
 summary(train.dl)
 #kham pha dl
-#Loai bo gia tri thieu
+# KT và loai bo gia tri thieu
+any(is.null(train.dl))
+any(is.na(train.dl))
+describe(train.dl)
 train.dl <- train.dl[complete.cases(train.dl),]
 
 #truc quan
@@ -35,19 +39,35 @@ fig <- function(width, heigth){
   options(repr.plot.width = width, repr.plot.height = heigth)
 }
 
+##biến
 #DL
-ggplot(train.dl, aes(y))+ geom_bar(color = "black",fill = "blue") + theme(text = element_text(size=10))
 fig(12, 8)
-ggplot(train.dl, aes(age)) + geom_histogram(binwidth = 5, color = "black",fill = "green") + theme(text = element_text(size=10))
+ggplot(train.dl, aes(y))+ geom_bar(color = "black",fill = "blue") + theme(text = element_text(size=10))
+
+ggplot(train.dl, aes(default))+geom_bar(color = "black",fill = "khaki") + theme(text = element_text(size=10))
+
+ggplot(train.dl, aes(housing)) + geom_bar(color = "black",fill = "firebrick2") + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$housing))*100,1)
+
+ggplot(train.dl, aes(loan)) + geom_bar(color = "black",fill = "darkviolet") + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$loan))*100,1)
+
+
+#kt phan phoi bien lien tuc
+fig(12, 8)
+#ggplot(train.dl, aes(age,color = y)) + geom_histogram(binwidth = 5, color = "black",fill = "green") + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(age, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$age)
 fig(20, 8)
-ggplot(train.dl, aes(balance)) + geom_area(stat = "bin", color = "black",fill = "cyan2",alpha = 0.5) + theme(text = element_text(size=10))
+#ggplot(train.dl, aes(balance)) + geom_area(stat = "bin", color = "black",fill = "cyan2",alpha = 0.5) + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(balance, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$balance)
 fig(20, 8)
-ggplot(train.dl, aes(duration)) + geom_area(stat = "bin", color = "black",fill = "pink2", alpha = 0.5) + theme(text = element_text(size=10))
+#ggplot(train.dl, aes(duration)) + geom_area(stat = "bin", color = "black",fill = "pink2", alpha = 0.5) + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(duration, color = y))+ geom_freqpoly(binwidth = 100, size = 1)
 summary(train.dl$duration)
 fig(20, 8)
-ggplot(train.dl, aes(campaign)) + geom_histogram(binwidth = 2, color = "black",fill = "chocolate2") + theme(text = element_text(size=10))
+ggplot(data = train.dl, aes(campaign, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$campaign)
 fig(20, 8)
 ggplot(train.dl, aes(day)) + geom_area(stat = "bin", color = "black",fill = "slateblue1", alpha = 0.5) + theme(text = element_text(size=10))
@@ -59,45 +79,11 @@ fig(20, 8)
 ggplot(train.dl, aes(previous))+ geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "brown") + theme(text = element_text(size=10))
 summary(train.dl$previous)
 
-
-fig(16, 8)
-ggplot(train.dl, aes(job)) + geom_bar(color = "black",fill = "purple") +  theme(text = element_text(size=10), axis.text.x=element_text(angle = 90, vjust = 0.5, hjust=1,size=10))
-round(prop.table(table(train.dl$job))*100,1)
-fig(10, 8)
-ggplot(train.dl, aes(marital)) + geom_bar(color = "black",fill = "darkturquoise") + theme(text = element_text(size=10))
-round(prop.table(table(train.dl$marital))*100,1)
-fig(10, 8)
-ggplot(train.dl, aes(education))+ geom_bar(color = "black",fill = "coral") + theme(text = element_text(size=10))
-round(prop.table(table(train.dl$education))*100,1)
-fig(12,8)
-ggplot(train.dl, aes(poutcome)) + geom_bar(color = "black",fill = "springgreen2") + theme(text = element_text(size=10))
-round(prop.table(table(train.dl$poutcome))*100,1)
-
-
-ggplot(train.dl, aes(default))+geom_bar(color = "black",fill = "khaki") + theme(text = element_text(size=10))
-fig(8,10)
-ggplot(train.dl, aes(housing)) + geom_bar(color = "black",fill = "firebrick2") + theme(text = element_text(size=10))
-round(prop.table(table(train.dl$housing))*100,1)
-fig(10,10)
-ggplot(train.dl, aes(contact)) + geom_bar(color = "black",fill = "forestgreen") + theme(text = element_text(size=10))
-round(prop.table(table(train.dl$contact))*100,1)
-fig(8,10)
-ggplot(train.dl, aes(loan)) + geom_bar(color = "black",fill = "darkviolet") + theme(text = element_text(size=10))
-round(prop.table(table(train.dl$loan))*100,1)
-
-
-#kt phan phoi bien lien tuc
-ggplot(data = train.dl, aes(age, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
-
-
-ggplot(data = train.dl, aes(balance, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
-ggplot(data = train.dl, aes(duration, color = y))+ geom_freqpoly(binwidth = 200, size = 1)
-ggplot(data = train.dl, aes(campaign, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
-
 train.dl %>%
-  dplyr::select (age,balance,duration,campaign) %>%
+  dplyr::select (age,balance,duration,campaign,day,pdays,previous) %>%
   cor() %>%
   corrplot.mixed(upper = "circle", tl.col = "black", number.cex = 0.7)
+
 
 #### Categorical Variables
 table(train.dl[("job")])
@@ -106,6 +92,24 @@ table(train.dl[("education")])
 table(train.dl[("poutcome")])
 table(train.dl[('contact')])
 table(train.dl[('month')])
+
+fig(16, 8)
+ggplot(train.dl, aes(job)) + geom_bar(aes(x = job, fill = y)) +  theme(text = element_text(size=10), axis.text.x=element_text(angle = 90, vjust = 0.5, hjust=1,size=10))
+round(prop.table(table(train.dl$job))*100,1)
+fig(16, 8)
+ggplot(train.dl, aes(marital)) + geom_bar(aes(x = marital, fill = y)) + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$marital))*100,1)
+fig(16, 8)
+ggplot(train.dl, aes(education))+ geom_bar(aes(x = education, fill = y)) + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$education))*100,1)
+
+ggplot(train.dl, aes(poutcome)) + geom_bar(aes(x = poutcome, fill = y)) + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$poutcome))*100,1)
+ggplot(train.dl, aes(contact)) + geom_bar(aes(x = contact, fill = y)) + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$contact))*100,1)
+
+
+
 
 ###Logistic 
 ###Processing
@@ -161,7 +165,7 @@ test.set %>%
 #xây dựng mô hình dựu báo trên bộ mẫu train.set
 logit_reg =glm(y ~ ., data = train.set,family = binomial(link = "logit"))
 summary(logit_reg) #chẩn đoán mô hình 
-
+vif(logit_reg)
 #dự báo trên bộ train.set 
 Prediction_train = predict(logit_reg, newdata =  train.set, type = "response")
 summary(Prediction_train)
