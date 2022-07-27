@@ -78,9 +78,9 @@ acf(train_airpassengers_diff) # q
 pacf(train_airpassengers_diff) # p
 #Create model
 # arima_air = auto.arima(train_airpassengers, ic = "aic", trace = TRUE)
-#   arima lấy mô hình nào có 3 giá trị p,d,q có inf lớn nhất thì lấy (2,1,1)
+#   arima lấy mô hình nào có 3 giá trị p,d,q có aic nhỏ nhất thì lấy (2,1,1)
 # ar lấy mô hình nào d=0, q = 0 (1,0,0)
-# arma lấy mô hình nào d = 0, (2,0,2)
+# arma lấy mô hình nào d = 0, (2,0,1)
 
 arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE) # chạy arima
 arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE, d =0) # chạy ar, arma
