@@ -55,7 +55,6 @@ seasonplot(train_airpassengers, year.labels="TRUE", main="Số lượng hành kh
 
 # Kiểm tra dữ liệu có dừng không?
 adf.test(train_airpassengers) # 0.01 smaller -> non-stationary  
-kpss.test(train_airpassengers) # 0.01 < -> non - station ary
 
 #KIỂM ĐỊNH TỰ TƯƠNG QUAN
 acf(train_airpassengers) # q
@@ -75,18 +74,19 @@ autoplot(train_airpassengers_diff) + ggtitle("Bieu dien sai phan bac 1") + ylab(
 #Kiểm tra lại
 
 adf.test(train_airpassengers_diff)
-
+acf(train_airpassengers_diff) # q
+pacf(train_airpassengers_diff) # p
 #Create model
 # arima_air = auto.arima(train_airpassengers, ic = "aic", trace = TRUE)
 #   arima lấy mô hình nào có 3 giá trị p,d,q có inf lớn nhất thì lấy (2,1,1)
 # ar lấy mô hình nào d=0, q = 0 (1,0,0)
 # arma lấy mô hình nào d = 0, (2,0,2)
 
-arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE, trend = 't') # chạy arima
+arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE) # chạy arima
 arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE, d =0) # chạy ar, arma
 
 # Chạy mô hình arima
-arima_model <- arima(train_airpassengers, order=c(2,1,1)) # theo từng mô hình thay các order
+arima_model <- arima(train_airpassengers, order=c(2,1,1), trend = "t") # theo từng mô hình thay các order
 arima_model
 checkresiduals(arima_model)
 acf(ts(arima_model$residuals))
@@ -118,13 +118,13 @@ plot(forecast_ar,                              # Draw train+forecast
      ylab = "Month")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
-legend("topright",                           # Add legend to plot
+legend("topleft",                           # Add legend to plot
        c("Train", "Test", "Predict"),
        lty = 1,
        col = 2:4)
 
 # Chạy mô hình arma
-arma_model <- arima(train_airpassengers, order=c(2,0,2)) # theo từng mô hình thay các order
+arma_model <- arima(train_airpassengers, order=c(2,0,1)) # theo từng mô hình thay các order
 arma_model
 checkresiduals(arma_model)
 acf(ts(arma_model$residuals))
@@ -137,7 +137,7 @@ plot(forecast_arma,                              # Draw train+forecast
      ylab = "Month")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
-legend("topright",                           # Add legend to plot
+legend("topleft",                           # Add legend to plot
        c("Train", "Test", "Predict"),
        lty = 1,
        col = 2:4)
