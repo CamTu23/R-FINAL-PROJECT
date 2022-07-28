@@ -86,7 +86,7 @@ arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE) # chạy ar
 arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE, d =0) # chạy ar, arma
 
 # Chạy mô hình arima
-arima_model <- arima(train_airpassengers, order=c(2,1,1), trend = "t") # theo từng mô hình thay các order
+arima_model <- arima(train_airpassengers, order=c(2,1,1)) # theo từng mô hình thay các order
 arima_model
 checkresiduals(arima_model)
 acf(ts(arima_model$residuals))

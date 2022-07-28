@@ -211,6 +211,7 @@ summary(model_4)
 # Prediction vs. Real values hình 1
 data_test$prediction <- predict(model_1, newdata = data_test)
 ggplot(data_test, aes(prediction, charges)) + geom_point(color = "blue", alpha = 0.5) + geom_abline(color = "red") + ggtitle("Prediction vs. Real values")
+summary(data_test$prediction)
 # => Dự đoán đoạn đầu giá trị thực nằm trên trùng khớp với đường dự đoán, đoạn sau các giá trị thực nằm trên dưới đường dự đoán 1 đoạn, giá trị dự đoán không chính xác
 # Dự đoán hình 2
 data_test$residuals <- data_test$charges - data_test$prediction
