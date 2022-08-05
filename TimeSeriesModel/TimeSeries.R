@@ -59,6 +59,7 @@ adf.test(train_airpassengers) # 0.01 smaller -> non-stationary
 #KIỂM ĐỊNH TỰ TƯƠNG QUAN
 acf(train_airpassengers) # q
 pacf(train_airpassengers) # p
+
 # => Không phải chuỗi nhiễu trắng
 
 #CHUYỂN DỮ LIỆU VỀ DỪNG
@@ -95,8 +96,8 @@ pacf(ts(arima_model$residuals))
 forecast_arima = forecast(arima_model, level = c(95), h=12*4)
 plot(forecast_arima,                              # Draw train+forecast
      col = 2,
-     xlab = "Number of passengers",
-     ylab = "Month")
+     xlab = "Month",
+     ylab = "Number of passengers")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
 legend("topright",                           # Add legend to plot
@@ -114,8 +115,8 @@ pacf(ts(ar_model$residuals))
 forecast_ar = forecast(ar_model, level = c(95), h=12*4)
 plot(forecast_ar,                              # Draw train+forecast
      col = 2,
-     xlab = "Number of passengers",
-     ylab = "Month")
+     xlab = "Month",
+     ylab = "Number of passengers")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
 legend("topleft",                           # Add legend to plot
@@ -133,8 +134,8 @@ pacf(ts(arma_model$residuals))
 forecast_arma = forecast(arma_model, level = c(95), h=12*4)
 plot(forecast_arma,                              # Draw train+forecast
      col = 2,
-     xlab = "Number of passengers",
-     ylab = "Month")
+     xlab = "Month",
+     ylab = "Number of passengers")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
 legend("topleft",                           # Add legend to plot

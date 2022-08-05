@@ -11,27 +11,48 @@ library(WVPlots)
 
 library(pearson7)
 library(reshape2)
+library(fastDummies)
+library(corrplot)
 #Load file
-data_insurance <- read.csv("./DATA/insurance.csv")
+data_insurance_1 <- read.csv("./DATA/insurance.csv")
 
 #Understanding data
-describe(data_insurance) #xem có biến nào bị null, không có giá trị không
-
+describe(data_insurance_1) #xem có biến nào bị null, không có giá trị không
+head(data_insurance_1)
 #EDA
 #Correlation age and charge
-ggplot(data_insurance, aes(age, charges, colour= age)) + geom_jitter(alpha = 0.5) + labs(title = "Correlation between age and charges")
+ggplot(data_insurance_1, aes(age, charges, colour= age)) + geom_jitter(alpha = 0.5) + labs(title = "Correlation between age and charges")
 #Correlation bmi and charge
-ggplot(data_insurance, aes(bmi, charges, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between BMI and charges")
+ggplot(data_insurance_1, aes(bmi, charges, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between BMI and charges")
 #Correlation charge and sex
-ggplot(data_insurance, aes(sex, charges, colour= sex)) + geom_jitter(alpha = 0.5) + labs(title = "Correlation between sex and charges")
+ggplot(data_insurance_1, aes(sex, charges, colour= sex)) + geom_jitter(alpha = 0.5) + labs(title = "Correlation between sex and charges")
 #Correlation charge and Children
-ggplot(data_insurance, aes(children, charges, colour= children)) + geom_jitter(alpha = 0.5) + labs(title = "Correlation between children and charges")
+ggplot(data_insurance_1, aes(children, charges, colour= children)) + geom_jitter(alpha = 0.5) + labs(title = "Correlation between children and charges")
 
 #Correlation charge and smoker
-ggplot(data_insurance, aes(smoker, charges, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and charges")
+ggplot(data_insurance_1, aes(smoker, charges, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and charges")
 
 #Correlation charge and Region
-ggplot(data_insurance, aes(region, charges, colour= region)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between region and charges")
+ggplot(data_insurance_1, aes(region, charges, colour= region)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between region and charges")
+
+# data_insurance = dummy_cols(data_insurance_1, select_columns = c("sex","smoker","region"))
+# head(data_insurance)
+# #options(max.print=5000)
+# str(data_insurance)
+# 
+# #Xoa cot chu Dl 
+# data_insurance <- data_insurance[,-c(2,5,6)]
+# head(data_insurance)
+
+#đổi DL
+data_insurance_1$sex=ifelse(data_insurance_1$sex=='female',1,0)
+data_insurance_1$smoker=ifelse(data_insurance_1$smoker=='yes',1,0)
+data_insurance_1$region=ifelse(data_insurance_1$region=='southwest',1,ifelse(data_insurance_1$region=='southeast',2,ifelse(data_insurance_1$region=='northwest',3,4)))
+str(data_insurance_1)
+
+data_insurance <- as.data.frame(data_insurance_1)
+cor(data_insurance)
+corrplot(cor(data_insurance), method = "circle")
 
 # data_insurance$sex = as.factor(data_insurance$sex)
 # data_insurance$smoker = as.factor(data_insurance$smoker)
@@ -52,17 +73,18 @@ ggplot(data_insurance, aes(region, charges, colour= region)) + geom_jitter(alpha
 
 #So sánh độ tương quan giữa các biến độc lập với nhau
 #Age & BMI, không có sự tương quan với nhau
-ggplot(data_insurance, aes(bmi, age, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between BMI and age")
-# #Age & smoker, không có sự tương quan với nhau
-ggplot(data_insurance, aes(smoker, age, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and age")
-# #Age & Children không có sự tương quan với nhau
-ggplot(data_insurance, aes(children, age, colour= children)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between children and age")
-# #BMI & Smoker, không có sự tương quan với nhau
-ggplot(data_insurance, aes(smoker, bmi, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and bmi")
-# # BMI & Children không có sự tương quan với nhau
-ggplot(data_insurance, aes(children, bmi, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between children and bmi")
-# 
-# # => Sau khi xem sự tương quan giữa các biến độc lập => Biểu đồ rắc rối, không nhận thấy rõ được sự tương quan hay không tương quan giữa các biến độc lập
+
+# ggplot(data_insurance, aes(bmi, age, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between BMI and age")
+# # #Age & smoker, không có sự tương quan với nhau
+# ggplot(data_insurance, aes(smoker, age, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and age")
+# # #Age & Children không có sự tương quan với nhau
+# ggplot(data_insurance, aes(children, age, colour= children)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between children and age")
+# # #BMI & Smoker, không có sự tương quan với nhau
+# ggplot(data_insurance, aes(smoker, bmi, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and bmi")
+# # # BMI & Children không có sự tương quan với nhau
+# ggplot(data_insurance, aes(children, bmi, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between children and bmi")
+# # 
+# # # => Sau khi xem sự tương quan giữa các biến độc lập => Biểu đồ rắc rối, không nhận thấy rõ được sự tương quan hay không tương quan giữa các biến độc lập
 
 #
 # formula_1 <- as.formula("charges ~ age") #mô hình 1 biến phụ thuộc 2 biến độc lập
@@ -81,8 +103,8 @@ ggplot(data_insurance, aes(children, bmi, colour= bmi)) + geom_jitter(alpha = 0.
 # 
 # #da bien
 # summary(lm(formula = charges ~ age + bmi, data = data_insurance))
-# #R - square = 0.1159
-
+# #R - square = 0.11593
+set.seed(123)
 # Split data to train and test
 train <- round(0.8 * nrow(data_insurance))
 # từ dataet gốc, lấy 80% bộ dữ liệu -> train_indices
@@ -94,22 +116,16 @@ data_test <- data_insurance[-train_indices, ]
 
 
 #da bien
-formula_1 <- as.formula("charges ~ age + bmi + smoker")
+formula_1 <- as.formula("charges ~ bmi+children + smoker")
 model_1 <- lm(formula_1, data = data_train)
-summary(model_1) # Y = -12130.4 + 257.2*X1 + 326.2*X2 + 514.3*X3 + 23576.1*X4 
-
-# r_sq_1 <- summary(model_1)$r.squared
-# prediction_1 <- predict(model_1, newdata = data_test)
-# residuals_1 <- data_test$charges - prediction_1
-# rmse_1 <- sqrt(mean(residuals_1^2))
-# print(paste0("R-squared for new model: ", round(r_sq_1, 4)))
+summary(model_1) # Y = -4652.07 + 401.65*bmi + 658.48*children + 23904.22*smoker
 
 #don bien
-formula_2 <- as.formula("charges ~ smoker")
+formula_2 <- as.formula("charges ~ smoker") # Smoker có R-squared lớn nhất = 63.45% nên sẽ chọn biến này biến độc lập cho mô hình linear đơn biến
 model_2 <- lm(formula_2, data = data_train)
 summary(model_2)
 
-formula_3 <- as.formula("charges ~ age")
+formula_3 <- as.formula("charges ~ children")
 model_3 <- lm(formula_3, data = data_train)
 summary(model_3)
 
@@ -117,95 +133,6 @@ formula_4 <- as.formula("charges ~ bmi")
 model_4 <- lm(formula_4, data = data_train)
 summary(model_4)
 
-
-# #Cat - 1: Smoker, have no dependent, BMI under 30.
-# ins_smoker_nochild_under30 <- data_insurance %>% filter(smoker == "yes" & children == 0 & bmi < 30)
-# ggplot(ins_smoker_nochild_under30, aes(age, charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với chi Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_under30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và chi Phí có vẻ có mối tương quan rối loạn.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_under30)) # R = 0.4725
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_under30)) # R = 0.5264
-# # Từ hai bản tóm tắt thì quyết định sử dụng hồi quy tuyến tính với 2 biến (tuổi và BMI) vì nó có giá trị R-Squared tốt hơn.
-# # -956.74 + (251.20 * AGE) + (505.18 * BMI)
-# 
-# #Cat - 2: Smoker, have no dependent, BMI over 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "yes" & children == 0 & bmi >= 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# 
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan, BMI tăng thì phí tắng. Có thể tiếp cận giao diện biểu đồ BMI so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) # R = 0.4495
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.565
-# # Từ hai bản tóm tắt thì quyết định sử dụng hồi quy tuyến tính với 2 biến (tuổi và BMI) vì nó có giá trị R-Squared tốt hơn.
-# # 8120.10 + (292.16 * AGE) + (614.01 * BMI)
-# 
-# # Cat - 3: Smoker, have dependents, BMI under 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "yes" & children > 0 & bmi >= 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan, BMI tăng thì phí tắng. Có thể tiếp cận giao diện biểu đồ BMI so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) # R = 0.4043
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.553
-# # Từ hai bản tóm tắt thì quyết định sử dụng hồi quy tuyến tính với 2 biến (tuổi và BMI) vì nó có giá trị R-Squared tốt hơn.
-# # 2428.48 + (259.48 * AGE) + (359.27 * BMI)
-# 
-# # Cat - 4 Smoker, have dependents, BMI over 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "yes" & children == 0 & bmi >= 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan, BMI tăng thì phí tắng. Có thể tiếp cận giao diện biểu đồ BMI so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) # R = 0.4495
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.565
-# # Từ hai bản tóm tắt thì quyết định sử dụng hồi quy tuyến tính với 2 biến (tuổi và BMI) vì nó có giá trị R-Squared tốt hơn.
-# # 16021.03 + (253.72 * AGE) + (447.91 * BMI)
-# 
-# #  Cat - 5 Non-smoker, have no dependent, BMI under 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "no" & children == 0 & bmi < 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan rối loạn.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) # R = 0.5543
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.5524
-# # Từ hai bản tóm tắt đó, tôi quyết định sử dụng hồi quy tuyến tính với 1 biến (tuổi) vì nó có giá trị R-Squared tốt hơn.
-# # -3239.15 + (277.00 * AGE)
-# 
-# # Cat - 6: Non-smoker, have no dependent, BMI over 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "no" & children == 0 & bmi >= 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan rối loạn.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) # R = 0.556
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.5552
-# # Từ hai bản tóm tắt đó, tôi quyết định sử dụng hồi quy tuyến tính với 1 biến (tuổi) vì nó có giá trị R-Squared tốt hơn.
-# # -2155.79 + (254.01 * AGE)
-# 
-# # Cat - 7: Non-smoker, have dependents, BMI under 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "no" & children > 0 & bmi < 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan rối loạn.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) #R = 0.2436
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.2427
-# # Từ hai bản tóm tắt đó, tôi quyết định sử dụng hồi quy tuyến tính với 1 biến (tuổi) vì nó có giá trị R-Squared tốt hơn.
-# # -884.08 + (247.85 * AGE)
-# 
-# # Cat - 8: Non-smoker, have dependents, BMI over 30.
-# ins_smoker_nochild_over30 <- data_insurance %>% filter(smoker == "no" & children > 0 & bmi >= 30)
-# ggplot(ins_smoker_nochild_over30, aes(x = age, y = charges)) + geom_point()
-# # Tuổi càng cao thì phí càng cao. Có thể tiếp cận giao diện biểu đồ Tuổi so với Phí bằng cách sử dụng hồi quy tuyến tính.
-# ggplot(ins_smoker_nochild_over30, aes(x = bmi, y = charges)) + geom_point()
-# # Chỉ số BMI và Phí có vẻ có mối tương quan rối loạn.
-# summary(lm(charges ~ age, data = ins_smoker_nochild_over30)) # R = 0.296
-# summary(lm(charges ~ age + bmi, data = ins_smoker_nochild_over30)) # R = 0.2944
-# # Từ hai bản tóm tắt đó, tôi quyết định sử dụng hồi quy tuyến tính với 1 biến (tuổi) vì nó có giá trị R-Squared tốt hơn.
-# # -2161.36 + (282.54 * AGE)
 
 # Model Performance 
 # Prediction vs. Real values hình 1
@@ -223,19 +150,19 @@ GainCurvePlot(data_test, "prediction", "charges", "Model")
 # predict với giá trị thực
 Tu <- data.frame(age = 20,
                   bmi = 27.9,
-                  sex = 'female',
+                  sex = 1,
                   children = 0,
-                  smoker = "yes",
-                  region = "northwest")
-print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #25345.68
+                  smoker = 1,
+                  region = 4)
+print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #30458.26
 # giá trị thực 2
 Tu <- data.frame(age = 20,
                  bmi = 27.9,
-                 sex = 'female',
+                 sex = 0,
                  children = 0,
-                 smoker = "no",
-                 region = "northwest")
-print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #2576.62
+                 smoker = 0,
+                 region = 3)
+print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #6554.04
 
 
 
