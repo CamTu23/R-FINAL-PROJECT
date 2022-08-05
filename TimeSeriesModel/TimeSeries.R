@@ -55,6 +55,7 @@ seasonplot(train_airpassengers, year.labels="TRUE", main="Số lượng hành kh
 
 # Kiểm tra dữ liệu có dừng không?
 adf.test(train_airpassengers) # 0.01 smaller -> non-stationary  
+kpss.test(train_airpassengers)
 
 #KIỂM ĐỊNH TỰ TƯƠNG QUAN
 acf(train_airpassengers) # q
@@ -64,19 +65,15 @@ pacf(train_airpassengers) # p
 
 #CHUYỂN DỮ LIỆU VỀ DỪNG
 # sai phân bậc 1
-train_airpassengers_diff <- diff(train_airpassengers)
-plot(train_airpassengers_diff)
-autoplot(train_airpassengers_diff) + ggtitle("Bieu dien sai phan bac 1") + ylab("Number of passengers")
-
-# acf2(diff(train_airpassengers))
-# check_stationary <- cbind(train_airpassengers, train_airpassengers_diff)
-# plot(check_stationary)
+train_airpassengers_diff1 <- diff(train_airpassengers, lag = 1)
+plot(train_airpassengers_diff1)
+autoplot(train_airpassengers_diff1) + ggtitle("Bieu dien sai phan bac 1") + ylab("Number of passengers")
 
 #Kiểm tra lại
+adf.test(train_airpassengers_diff1)
+acf(train_airpassengers_diff1) # q
+pacf(train_airpassengers_diff1) # p
 
-adf.test(train_airpassengers_diff)
-acf(train_airpassengers_diff) # q
-pacf(train_airpassengers_diff) # p
 #Create model
 # arima_air = auto.arima(train_airpassengers, ic = "aic", trace = TRUE)
 #   arima lấy mô hình nào có 3 giá trị p,d,q có aic nhỏ nhất thì lấy (2,1,1)
@@ -87,9 +84,10 @@ arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE) # chạy ar
 arima_air = auto.arima(train_airpassengers,ic = "aic", trace = TRUE, d =0) # chạy ar, arma
 
 # Chạy mô hình arima
-arima_model <- arima(train_airpassengers, order=c(2,1,1)) # theo từng mô hình thay các order
+arima_model <- arima(train_airpassengers, order=c(1,1,0)) # theo từng mô hình thay các order
 arima_model
 checkresiduals(arima_model)
+accuracy(arima_model)
 acf(ts(arima_model$residuals))
 pacf(ts(arima_model$residuals))
 
@@ -109,6 +107,7 @@ legend("topright",                           # Add legend to plot
 ar_model <- arima(train_airpassengers, order=c(1,0,0)) # theo từng mô hình thay các order
 ar_model
 checkresiduals(ar_model)
+accuracy(ar_model)
 acf(ts(ar_model$residuals))
 pacf(ts(ar_model$residuals))
 
@@ -119,7 +118,7 @@ plot(forecast_ar,                              # Draw train+forecast
      ylab = "Number of passengers")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
-legend("topleft",                           # Add legend to plot
+legend("topright",                           # Add legend to plot
        c("Train", "Test", "Predict"),
        lty = 1,
        col = 2:4)
@@ -138,7 +137,7 @@ plot(forecast_arma,                              # Draw train+forecast
      ylab = "Number of passengers")
 lines(test_airpassengers,                             # Draw test   
       col = 3)
-legend("topleft",                           # Add legend to plot
+legend("topright",                           # Add legend to plot
        c("Train", "Test", "Predict"),
        lty = 1,
        col = 2:4)

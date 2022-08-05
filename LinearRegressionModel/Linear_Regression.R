@@ -13,6 +13,8 @@ library(pearson7)
 library(reshape2)
 library(fastDummies)
 library(corrplot)
+library(neuralnet)
+library(MASS)
 #Load file
 data_insurance_1 <- read.csv("./DATA/insurance.csv")
 
@@ -164,6 +166,26 @@ Tu <- data.frame(age = 20,
                  region = 3)
 print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #6554.04
 
+
+#Machine learning
+#neural network
+# Build Neural Network
+nn <- neuralnet(charges ~ age + bmi + sex + children + smoker + region, 
+                data = data_train, hidden = c(5, 3), 
+                linear.output = TRUE)
+
+# Predict on test data
+pr.nn <- compute(nn, data_test[,1:7])
+
+# Compute mean squared error
+pr.nn_ <- pr.nn$net.result * (max(data$charges) - min(data$charges)) 
++ min(data$charges)
+test.r <- (data_test$charges) * (max(data$charges) - min(data$charges)) + 
+  min(data$charges)
+MSE.nn <- sum((test.r - pr.nn_)^2) / nrow(data_test)
+
+# Plot the neural network
+plot(nn)
 
 
 
