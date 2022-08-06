@@ -3,7 +3,6 @@ library(ggplot2)
 library(dplyr)
 library(magrittr)
 
-
 library(corrplot)
 library(caret)
 library(MASS)
@@ -11,7 +10,6 @@ library(tidyverse)
 
 library(mlbench)
 library(gmodels)
-
 
 library(class)
 library(caTools)
@@ -124,9 +122,6 @@ round(prop.table(table(train.dl$poutcome))*100,1)
 ggplot(train.dl, aes(contact)) + geom_bar(aes(x = contact, fill = y)) + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$contact))*100,1)
 
-
-
-
 ###Logistic 
 ###Processing
 lr.df <- train.dl
@@ -193,8 +188,6 @@ summary(Prediction_train)
 Prediction = predict(logit_reg, newdata =  test.set, type = "response")
 summary(Prediction)
 
-
-
 # mức cắt dự đoán tối uu cho mô hình
 library(InformationValue)
 optCutOff <- optimalCutoff(test.set$y, Prediction)[1] 
@@ -249,7 +242,7 @@ plotTable <- table %>%
 ggplot(data = plotTable, mapping = aes(x = Reference, y = Prediction, fill = goodbad, alpha = prop)) +geom_tile() +
   geom_text(aes(label = Freq), vjust = .5, fontface  = "bold", alpha = 1,size = 10) + scale_fill_manual(values = c(good = "forestgreen", bad = "firebrick1")) +
   theme_bw() +xlim(rev(levels(table$Reference))) +theme(text = element_text(size=10)) +xlab("True Value")
-
+###############################
 #Machine learning
 # https://www.youtube.com/watch?v=BUr1DuS8LMw
 library(tree)
@@ -260,17 +253,6 @@ library(confusionMatrix)
 dt.df <- DL
 head(dt.df)
 dt.df <- data.frame(dt.df)
-
-#input.data <- dt.df[c(1:105),]
-
-#png(file = "decision_tree.png")
-#tree <- ctree(y~, input.data)
-
-# Plot the tree.
-#plot(tree)
-
-# Save the file.
-#dev.off()
 
 set.seed(8)
 train.size = floor(0.75*nrow(dt.df))
@@ -303,8 +285,6 @@ matrix_1 = table(test.set$y, Prediction.dt)
 # Tính độ chính xác của mô hình theo 2 cách
 # data/code from "2 class example" example courtesy of ?caret::confusionMatrix
 # Ma trận hỗn loạn 
-confusionMatrix(Prediction.dt, test.set$y)
-# => Độ chính xác của mô hình là 88.17%
 
 lvs <- c("no", "yes")
 truth <- factor(rep(lvs, times = c(9940, 1363)),
@@ -323,16 +303,15 @@ caret::confusionMatrix(pred, truth)
 # => Độ chính xác của mô hình là 88.17%
 
 #hàm cv.tree thực hiện xác nhận chéo để xác định mức độ tối ưu của cây phức tạp, báo cáo số lượng nút đầu cuối của mỗi cây được xem xét (kích thước) cũng như tỷ lệ lỗi tương ứng và giá trị của tham số chi phí-độ phức tạp được sử dụng.
-# đối số FUN = prune.misclassđể chỉ ra  tỷ lệ lỗi muốn phân loại, thay vì mặc định là deviance
+# Đối số FUN = prune.misclassđể chỉ ra  tỷ lệ lỗi muốn phân loại, thay vì mặc định là deviance
 cv_dt.model=cv.tree(dt.model,FUN=prune.misclass)
-#nomes = cv_dt.model
-#print(cv_dt.model)
+print(cv_dt.model)
 #cex.lab là cỡ chữ (label), cex.axis là kích thước giá trị cột, hàng
-# 
+# Vẽ biểu đồ
 plot(cv_dt.model$size,cv_dt.model$dev,type="b",cex.lab=1, cex.axis=1, cex.main=2, cex.sub=2)
 
-#prune.misclass() la hàm để cắt tỉa cây
-prune_dt.model=prune.misclass(dt.model,best=1)
+#prune.misclass() là hàm để cắt tỉa cây
+prune_dt.model=prune.misclass(dt.model,best=3)
 summary(prune_dt.model)
 plot(prune_dt.model)
 text(prune_dt.model,pretty=0,cex=1)
@@ -341,4 +320,30 @@ text(prune_dt.model,pretty=0,cex=1)
 Prediction.dt2=predict(prune_dt.model,test.set,type="class")
 table(predicted = Prediction.dt2, true = y.test)
 
+#####################
+#Random Forest
+library(randomForest)
+set.seed(8)
+rf.df <- DL
+head(rf.df)
+rf.df <- data.frame(rf.df)
+train.size = floor(0.75*nrow(rf.df))
+train.index = sample(1:nrow(rf.df), train.size)
+train.set = rf.df[train.index,]
+test.set = rf.df[-train.index,]
+y.test = rf.df[-train.index,17]
 
+#Xây dựng model randomForest
+rf.model <- randomForest(as.factor(y) ~ .,data=train.set)
+Prediction.rf = predict(rf.model, newdata=test.set)
+table(predicted = Prediction.rf, true = y.test)
+matrix_1 = table(test.set$y, Prediction.rf)
+
+print(rf.model)
+# Chọn biến quan trọng
+#Evaluate variable importance
+importance(rf.model)
+varImpPlot(rf.model,cex = 1)
+
+# Độ chính xác trên mẫu kiểm định
+(matrix_1[1,1] + matrix_1[2,2])/(nrow(test.set))
