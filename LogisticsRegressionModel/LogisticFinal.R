@@ -349,3 +349,20 @@ varImpPlot(rf.model,cex = 1)
 
 #Độ chính xác trên mẫu kiểm định
 (matrix_1[1,1] + matrix_1[2,2])/(nrow(test.set))
+###################
+#SVM
+library(e1071)
+library(caret)
+#Xây dựng mô hình và dự đoán
+model_reg = svm(y~., data= train.set)
+print(model_reg)
+pred = predict(model_reg, test.set)
+x = 1:length(test.set$y)
+plot(x, test.set$y, pch=18, col="red")
+lines(x, pred, lwd="1", col="blue")
+
+# Kiểm tra độ chính xác
+mae = MAE(test.set$y, pred)
+rmse = RMSE(test.set$y, pred)
+r2 = R2(test.set$y, pred, form = "traditional")
+cat(" MAE:", mae, "\n", "RMSE:", rmse, "\n", "R-squared:", r2)
