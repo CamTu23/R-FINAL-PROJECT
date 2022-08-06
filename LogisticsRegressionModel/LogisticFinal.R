@@ -327,6 +327,7 @@ set.seed(8)
 rf.df <- DL
 head(rf.df)
 rf.df <- data.frame(rf.df)
+#Chia bộ mẫu train/test
 train.size = floor(0.75*nrow(rf.df))
 train.index = sample(1:nrow(rf.df), train.size)
 train.set = rf.df[train.index,]
@@ -340,10 +341,11 @@ table(predicted = Prediction.rf, true = y.test)
 matrix_1 = table(test.set$y, Prediction.rf)
 
 print(rf.model)
-# Chọn biến quan trọng
+#Chọn biến quan trọng
 #Evaluate variable importance
 importance(rf.model)
+# Vẽ biểu đồ
 varImpPlot(rf.model,cex = 1)
 
-# Độ chính xác trên mẫu kiểm định
+#Độ chính xác trên mẫu kiểm định
 (matrix_1[1,1] + matrix_1[2,2])/(nrow(test.set))
