@@ -6,15 +6,19 @@ library(plotly) #make a pie chart
 library(Metrics) #find error value
 library(Hmisc)
 library(cowplot)
-
 library(WVPlots)
-
 library(pearson7)
 library(reshape2)
 library(fastDummies)
 library(corrplot)
 library(neuralnet)
 library(MASS)
+library(e1071)
+library(caret)
+library(rpart) #decision tree
+library(rpart.plot)
+library(party)
+library(randomForest)
 #Load file
 data_insurance_1 <- read.csv("./DATA/insurance.csv")
 
@@ -170,26 +174,60 @@ print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #6
 #Machine learning
 #neural network
 # Build Neural Network
-nn <- neuralnet(charges ~ age + bmi + sex + children + smoker + region, 
-                data = data_train, hidden = c(5, 3), 
-                linear.output = TRUE)
+# nn <- neuralnet(charges ~ bmi + children + smoker, 
+#                 data = data_train, hidden = c(5, 3), 
+#                 linear.output = TRUE)
+# 
+# # Predict on test data
+# pr.nn <- compute(nn, data_test[,1:7])
+# 
+# # Compute mean squared error
+# pr.nn_ <- pr.nn$net.result * (max(data$charges) - min(data$charges)) 
+# + min(data$charges)
+# test.r <- (data_test$charges) * (max(data$charges) - min(data$charges)) + 
+#   min(data$charges)
+# pred_nn = predict(nn, data_test)
+# MSE.nn <- sum((test.r - pr.nn_)^2) / nrow(data_test)
+# mae = MAE( data_test$charges, pred_nn)
+# rmse = RMSE( data_test$charges, pred_nn)
+# r2 = R2( data_test$charges, pr_nn, form = "traditional")
+# cat(" MAE:", mae, "\n", "RMSE:", rmse, "\n", "R-squared:", r2)
+# 
+# # Plot the neural network
+# plot(nn)
+# 
+# plot(data_test$charges, pr.nn_, col = "red", 
+#      main = 'Real vs Predicted')
+# abline(0, 1, lwd = 2)
 
-# Predict on test data
-pr.nn <- compute(nn, data_test[,1:7])
+#SVM
+#Xây dựng mô hình và dự đoán
+model_reg = svm(charges~., data= data_train)
+print(model_reg)
+pred = predict(model_reg, data_test)
+x = 1:length(data_test$charges)
+plot(x, data_test$charges, pch=18, col="red")
+lines(x, pred, lwd="1", col="blue")
+# Kiểm tra độ chính xác
+mae = MAE( data_test$charges, pred)
+rmse = RMSE( data_test$charges, pred)
+r2 = R2( data_test$charges, pred, form = "traditional")
+cat(" MAE:", mae, "\n", "RMSE:", rmse, "\n", "R-squared:", r2)
 
-# Compute mean squared error
-pr.nn_ <- pr.nn$net.result * (max(data$charges) - min(data$charges)) 
-+ min(data$charges)
-test.r <- (data_test$charges) * (max(data$charges) - min(data$charges)) + 
-  min(data$charges)
-MSE.nn <- sum((test.r - pr.nn_)^2) / nrow(data_test)
+#decision tree
+model_tree<-rpart(charges ~., data = data_train)
+rpart.plot(model_tree)
+#Bảng Giá trị predict
+tbl<-table(predict(model_tree), data_train$charges)
+print(tbl)
+#Predict và đánh giá
+pred_tree<-predict(model_tree,data_test)
+mae = MAE( data_test$charges, pred_tree)
+rmse = RMSE( data_test$charges, pred_tree)
+r2 = R2( data_test$charges, pred_tree, form = "traditional")
+cat(" MAE:", mae, "\n", "RMSE:", rmse, "\n", "R-squared:", r2)
 
-# Plot the neural network
-plot(nn)
-
-
-
-
-
-
-
+# Random forest
+random_forest <- randomForest(charges ~., data = data_train, mtry = 3, importance = TRUE, na.action = na.omit)
+print(random_forest)
+plot(random_forest)
