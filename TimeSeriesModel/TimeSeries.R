@@ -14,6 +14,7 @@ library(caTools)
 library(astsa)
 library(fpp2)
 library(rpart)
+library(urca)
 
 #Load data
 f <- file.choose() # chọn file AirPassengers.csv trong thư mục DATA của TimeSeriesModel
@@ -54,29 +55,40 @@ monthplot(train_airpassengers, xlab="Month", ylab="Passenger", main="Số lượ
 seasonplot(train_airpassengers, year.labels="TRUE", main="Số lượng hành khách theo năm", col = 1:11) # tăng dần theo năm
 
 # Kiểm tra dữ liệu có dừng không?
-adf.test(train_airpassengers) # 0.01 smaller -> non-stationary  
-kpss.test(train_airpassengers)
-
+ur.df(train_airpassengers, lags = 1, 
+      type = c("none", "drift", "trend"), 
+      selectlags = c("Fixed", "AIC", "BIC"))
+adf.test(train_airpassengers)    
+# p-value = 0.01 < 0.05 => dừng
 #KIỂM ĐỊNH TỰ TƯƠNG QUAN
 acf(train_airpassengers) # q
 pacf(train_airpassengers) # p
 
 # => Không phải chuỗi nhiễu trắng
 
-#CHUYỂN DỮ LIỆU VỀ DỪNG
-# sai phân bậc 1
-train_airpassengers_diff1 <- diff(train_airpassengers, lag = 1)
-plot(train_airpassengers_diff1)
-autoplot(train_airpassengers_diff1) + ggtitle("Bieu dien sai phan bac 1") + ylab("Number of passengers")
-
-#Kiểm tra lại
-adf.test(train_airpassengers_diff1)
-acf(train_airpassengers_diff1) # q
-pacf(train_airpassengers_diff1) # p
+# #CHUYỂN DỮ LIỆU VỀ DỪNG
+# # sai phân bậc 1
+# train_airpassengers_diff1 <- diff(train_airpassengers, lag = 1)
+# plot(train_airpassengers_diff1)
+# autoplot(train_airpassengers_diff1) + ggtitle("Bieu dien sai phan bac 1") + ylab("Number of passengers")
+# 
+# #Kiểm tra lại
+# adf.test(train_airpassengers_diff1)
+# acf(train_airpassengers_diff1) # q
+# pacf(train_airpassengers_diff1) # p
+# 
+# train_airpassengers_diff2 <- diff(train_airpassengers_diff1, lag = 1)
+# plot(train_airpassengers_diff2)
+# autoplot(train_airpassengers_diff2) + ggtitle("Bieu dien sai phan bac 2") + ylab("Number of passengers")
+# 
+# #Kiểm tra lại
+# adf.test(train_airpassengers_diff2)
+# acf(train_airpassengers_diff2) # q
+# pacf(train_airpassengers_diff2) # p
 
 #Create model
 # arima_air = auto.arima(train_airpassengers, ic = "aic", trace = TRUE)
-#   arima lấy mô hình nào có 3 giá trị p,d,q có aic nhỏ nhất thì lấy (2,1,1)
+#   arima lấy mô hình nào có 3 giá trị p,d,q có aic nhỏ nhất thì lấy (1,1,0)
 # ar lấy mô hình nào d=0, q = 0 (1,0,0)
 # arma lấy mô hình nào d = 0, (2,0,1)
 
