@@ -6,14 +6,18 @@ library(class)
 library(fastDummies)
 library(InformationValue)
 library(caret)
-
+library(caTools)
+library(ggplot2)
+library(lattice)
 # Gán đường dẫn cho train.path, test.path
-train.path <- "./DATA/train.csv"
+train.path <- 
 test.path <- "./DATA/test.csv"
 
+
 # Đọc dữ liệu từ file gán cho Mt_df, test_df
-Mt_df <- read.table(train.path,header = T, sep = ";")
+Mt_df <- read.csv("./DATA/train.csv",header = T, sep = ";")
 test_df <- read.table(test.path,header = T, sep = ";")
+
 
 # Đọc n row đầu của dataset
 head(Mt_df)
@@ -65,8 +69,14 @@ logit_reg = glm(y ~ ., data = train.set, family = binomial(link = "logit"))
 summary(logit_reg)
 
 # Predict model
+
 # Dự báo: mô hình nhị thức thì dự đoán mặc định là log-odds và type = "response" (0 hoặc 1) cho tỷ lệ dự đoán 
 Prediction = predict(logit_reg, test.set, type = "response")
+# mức cắt dự đoán tối uu cho mô hình
+optCutOff <- optimalCutoff(test.set$y, Prediction)[1] 
+print(optCutOff)
+#tính toán tổng tỷ lệ lỗi phân loại sai
+misClassError(test.set$y, Prediction, threshold = optCutOff)
 # Vẽ biểu đồ
 plotROC(test.set$y, Prediction)
 # => Mô hình trên có diện tích đường cong ROC = 90,23% => Khả năng dự đoán của mô hình rất tốt.
@@ -85,7 +95,8 @@ sensitivity(test.set$y, Prediction, threshold = optCutOff) #True Positive Rate
 # Xây dựng ma trận hỗn loạn Confusion matrix
 # Ma trận hỗn loạn, Đồ thị trực quan của 2 yếu tố Thực tế và Dự đoán => đo lường hiệu suất của mô hình Classification
 # Mặc định ngưỡng (threshold) được sử dụng là 0.5, tức là 1 điểm dữ liệu x sẽ được dự đoán rơi vào lớp 1 nếu giá trị predict_proba (x) > 0.5 và ngược lại
-confusionMatrix(test.set$y,Prediction, threshold = 0.5)
+
+confusionMatrix(test.set$y,Prediction, threshold = optCutOff)
 
 # data/code from "2 class example" example courtesy of ?caret::confusionMatrix
 
@@ -94,8 +105,8 @@ truth <- factor(rep(lvs, times = c(9940, 1363)),
                 levels = rev(lvs))
 pred <- factor(
   c(
-    rep(lvs, times = c(9712, 228)),
-    rep(lvs, times = c(901, 462))),
+    rep(lvs, times = c(9591, 349)),
+    rep(lvs, times = c(774, 589))),
   levels = rev(lvs))
 
 caret::confusionMatrix(pred, truth)
