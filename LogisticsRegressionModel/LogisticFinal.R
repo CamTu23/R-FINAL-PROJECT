@@ -53,9 +53,6 @@ round(prop.table(table(train.dl$housing))*100,1)
 ggplot(train.dl, aes(loan)) + geom_bar(color = "black",fill = "darkviolet") + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$loan))*100,1)
 
-
-
-
 #kt phan phoi bien lien tuc
 fig(8, 8)
 ggplot(data = train.dl, aes(age, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
@@ -72,7 +69,6 @@ ggplot(data = train.dl, aes(pdays, color = y))+ geom_freqpoly(binwidth =100, siz
 summary(train.dl$pdays)
 ggplot(data = train.dl, aes(previous, color = y))+ geom_freqpoly(binwidth = 100, size = 1)
 summary(train.dl$previous)
-
 
 # Correlation matrix
 cordata = train.dl[,c("age","balance","day","duration","campaign","pdays","previous")]
@@ -105,7 +101,6 @@ ggplot(train.dl, aes(contact)) + geom_bar(aes(x = contact, fill = y)) + theme(te
 round(prop.table(table(train.dl$contact))*100,1)
 ggplot(train.dl, aes(month))+ geom_bar(aes(x = month, fill = y)) + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$month))*100,1)
-
 
 ###Logistic 
 ###Processing
@@ -147,7 +142,6 @@ train.set %>%
 test.set %>%
   summarise(Total = n())
 
-
 # Đơn biến: Xét biến loan 
 logit_don =glm(y ~ housing, data = train.set,family = binomial(link = "logit"))
 summary(logit_don)
@@ -182,8 +176,6 @@ confusionMatrix(test.set$y,Prediction_don, threshold = optCutOff)
 
 #vẽ ROC
 plotROC(test.set$y, Prediction_don)
-
-
 
 #mô hình hồi quy đa biến Logistic trên tất cả các biến 
 
@@ -312,4 +304,3 @@ matrix_1 = table(Predicted = Prediction.rf, True = test.set$y)
 (matrix_1[1,1] + matrix_1[2,2])/(nrow(test.set))
 
 ###################
-
