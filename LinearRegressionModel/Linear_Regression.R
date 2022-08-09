@@ -60,56 +60,7 @@ data_insurance <- as.data.frame(data_insurance_1)
 cor(data_insurance)
 corrplot(cor(data_insurance), method = "circle")
 
-# data_insurance$sex = as.factor(data_insurance$sex)
-# data_insurance$smoker = as.factor(data_insurance$smoker)
-# data_insurance$region = as.factor(data_insurance$region)
-# data_insurance_2 <- melt(data_insurance)
-# head(data_insurance_2)
-# ggplot(data = data_insurance, aes(x=, y=, fill=value)) + geom_tile()
-
-#Sau khi biểu diễn độ tương quan giữa charges và các biến thì ta thấy rằng:
-# - Đối với children, ngoại trừ không có trẻ em thì có mật độ giống nhau. Chưa có con sẽ ảnh hưởng đến chi phí bảo hiểm
-# - Đối với age tuổi càng cao chi phí bảo hiểm càng cao
-# - Đối với bmi, tương quan khá rắc rối, cmi càng cao chi phí càng cao
-# - Đối với giới tính, không có sự tương quan gì giữa giới tính và chi phí bảo hiểm
-# - Đối với smoker, có sự phụ thuộc của người hút thuốc, người hút thuốc thì sẽ có chi phí bảo hiểm cao hơn không hút thuốc
-# - Đối với region, không có sự tương quan nào, chi phí bảo hiểm không phụ thuộc vào vùng miền 
-
-#=> chọn được age, bmi, children, smoker
-
-#So sánh độ tương quan giữa các biến độc lập với nhau
-#Age & BMI, không có sự tương quan với nhau
-
-# ggplot(data_insurance, aes(bmi, age, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between BMI and age")
-# # #Age & smoker, không có sự tương quan với nhau
-# ggplot(data_insurance, aes(smoker, age, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and age")
-# # #Age & Children không có sự tương quan với nhau
-# ggplot(data_insurance, aes(children, age, colour= children)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between children and age")
-# # #BMI & Smoker, không có sự tương quan với nhau
-# ggplot(data_insurance, aes(smoker, bmi, colour= smoker)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between smoker and bmi")
-# # # BMI & Children không có sự tương quan với nhau
-# ggplot(data_insurance, aes(children, bmi, colour= bmi)) + geom_jitter(alpha = 0.7) + labs(title = "Correlation between children and bmi")
-# # 
-# # # => Sau khi xem sự tương quan giữa các biến độc lập => Biểu đồ rắc rối, không nhận thấy rõ được sự tương quan hay không tương quan giữa các biến độc lập
-
-#
-# formula_1 <- as.formula("charges ~ age") #mô hình 1 biến phụ thuộc 2 biến độc lập
-# model_1 <- lm(formula_1, data = data_train) #hàm lm() cho phép thực hiện hồi quy tuyến tính
-# summary(model_1)
-# #
-# formula_2 <- as.formula("charges ~ age") #mô hình 1 biến phụ thuộc 2 biến độc lập
-# model_2 <- lm(formula_2, data = data_test) #hàm lm() cho phép thực hiện hồi quy tuyến tính 
-# summary(model_2)
-
-# #don bien
-# summary(lm(formula = charges ~ age, data = data_insurance))
-# summary(lm(formula = charges ~ bmi, data = data_insurance))
-# # Nếu là mô hình đơn biến => chọn age vì R - square của mô hình biến độc lập age lớn hơn
-# # => Mô hình hồi quy đơn biến là: 3165.9
-# 
-# #da bien
-# summary(lm(formula = charges ~ age + bmi, data = data_insurance))
-# #R - square = 0.11593
+# Chọn ra được biến children, bmi, smoke
 set.seed(123)
 # Split data to train and test
 train <- round(0.8 * nrow(data_insurance))
@@ -164,10 +115,10 @@ print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #3
 # giá trị thực 2
 Tu <- data.frame(age = 20,
                  bmi = 27.9,
-                 sex = 0,
+                 sex = 1,
                  children = 0,
                  smoker = 0,
-                 region = 3)
+                 region = 4)
 print(paste0("Health care charges for Tu: ", round(predict(model_1, Tu), 2))) #6554.04
 
 
@@ -231,3 +182,9 @@ cat(" MAE:", mae, "\n", "RMSE:", rmse, "\n", "R-squared:", r2)
 random_forest <- randomForest(charges ~., data = data_train, mtry = 3, importance = TRUE, na.action = na.omit)
 print(random_forest)
 plot(random_forest)
+pred_forest<-predict(random_forest,data_test)
+mae = MAE( data_test$charges, pred_forest)
+rmse = RMSE( data_test$charges, pred_forest)
+r2 = R2( data_test$charges, pred_forest, form = "traditional")
+cat(" MAE:", mae, "\n", "RMSE:", rmse, "\n", "R-squared:", r2)
+
