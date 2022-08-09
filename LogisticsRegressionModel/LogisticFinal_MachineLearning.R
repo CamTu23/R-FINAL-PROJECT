@@ -9,17 +9,20 @@ library(tidyverse)
 library(mlbench)
 library(gmodels)
 library(class)
-library(caTools)
 library(epiDisplay)
 library(DescTools)
 library(rms)
 library(ROCR)
-library(InformationValue)
 library(glmnet)
+library(caTools)
+library(InformationValue)
+library(magrittr)
+library(fastDummies)
+library(plotly)
+library(GGally)
+library(ggcorrplot)
 
-
-library(readr)
-f <- file.choose() # Chọn file DL.csv trong thư mục DATA của mục Logistic Model
+f <- file.choose() 
 DL <- read.csv(f) 
 train.dl <- DL
 train.dl <- data.frame(train.dl)
@@ -42,58 +45,44 @@ fig <- function(width, heigth){
 #DL
 fig(12, 8)
 ggplot(train.dl, aes(y))+ geom_bar(color = "black",fill = "blue") + theme(text = element_text(size=10))
-
+round(prop.table(table(train.dl$y))*100,1)
 ggplot(train.dl, aes(default))+geom_bar(color = "black",fill = "khaki") + theme(text = element_text(size=10))
-
+round(prop.table(table(train.dl$default))*100,1)
 ggplot(train.dl, aes(housing)) + geom_bar(color = "black",fill = "firebrick2") + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$housing))*100,1)
-
 ggplot(train.dl, aes(loan)) + geom_bar(color = "black",fill = "darkviolet") + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$loan))*100,1)
 
 
+
+
 #kt phan phoi bien lien tuc
-fig(12, 8)
-#ggplot(train.dl, aes(age,color = y)) + geom_histogram(binwidth = 5, color = "black",fill = "green") + theme(text = element_text(size=10))
+fig(8, 8)
 ggplot(data = train.dl, aes(age, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$age)
-fig(12, 8)
-#ggplot(train.dl, aes(balance)) + geom_area(stat = "bin", color = "black",fill = "cyan2",alpha = 0.5) + theme(text = element_text(size=10))
 ggplot(data = train.dl, aes(balance, color = y))+ geom_freqpoly(binwidth = 1000, size = 1)
 summary(train.dl$balance)
-fig(20, 8)
-#ggplot(train.dl, aes(duration)) + geom_area(stat = "bin", color = "black",fill = "pink2", alpha = 0.5) + theme(text = element_text(size=10))
 ggplot(data = train.dl, aes(duration, color = y))+ geom_freqpoly(binwidth = 100, size = 1)
 summary(train.dl$duration)
-fig(20, 8)
 ggplot(data = train.dl, aes(campaign, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$campaign)
-fig(20, 8)
 ggplot(data = train.dl, aes(day, color = y))+ geom_freqpoly(binwidth = 5, size = 1)
 summary(train.dl$day)
-fig(20, 8)
 ggplot(data = train.dl, aes(pdays, color = y))+ geom_freqpoly(binwidth =100, size = 1)
 summary(train.dl$pdays)
-fig(20, 8)
 ggplot(data = train.dl, aes(previous, color = y))+ geom_freqpoly(binwidth = 100, size = 1)
 summary(train.dl$previous)
 
 
-# fig(20, 8)
-# ggplot(train.dl, aes(day)) + geom_area(stat = "bin", color = "black",fill = "slateblue1", alpha = 0.5) + theme(text = element_text(size=10))
-# summary(train.dl$day)
-# fig(20, 8)
-# ggplot(train.dl, aes(pdays)) + geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "deepskyblue3") + theme(text = element_text(size=10))
-# summary(train.dl$pdays)
-# fig(20, 8)
-# ggplot(train.dl, aes(previous))+ geom_area(binwidth = 10, stat = "bin" ,alpha = 0.5, color = "black",fill = "brown") + theme(text = element_text(size=10))
-# summary(train.dl$previous)
+# Correlation matrix
+cordata = train.dl[,c("age","balance","day","duration","campaign","pdays","previous")]
+# Plot
+corr <- round(cor(cordata), 1)
+ggcorrplot(corr, hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3, method="circle", colors = c("blue", "white", "red"), outline.color = "gray", show.legend = TRUE, show.diag = FALSE, title="Correlogram of variables")
 
-train.dl %>%
-  dplyr::select (age,balance,duration,campaign,day,pdays,previous) %>%
-  cor() %>%
-  corrplot.mixed(upper = "circle", tl.col = "black", number.cex = 0.7)
-
+cor(cordata)
+# Nhận xét có sự tương quan giữa các biến day, campain, pdays. Còn lại balance hoặc age vs  duration,previous k có sự tương quan nhưng xét tương quan thì age nhỏ hơn nên họn age
+# Các biến còn lại: age,duration,previous
 
 #### Categorical Variables
 table(train.dl[("job")])
@@ -103,22 +92,19 @@ table(train.dl[("poutcome")])
 table(train.dl[('contact')])
 table(train.dl[('month')])
 
-fig(16, 8)
+fig(20,16)
 ggplot(train.dl, aes(job)) + geom_bar(aes(x = job, fill = y)) +  theme(text = element_text(size=10), axis.text.x=element_text(angle = 90, vjust = 0.5, hjust=1,size=10))
 round(prop.table(table(train.dl$job))*100,1)
-fig(16, 8)
 ggplot(train.dl, aes(marital)) + geom_bar(aes(x = marital, fill = y)) + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$marital))*100,1)
-fig(16, 8)
 ggplot(train.dl, aes(education))+ geom_bar(aes(x = education, fill = y)) + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$education))*100,1)
-
 ggplot(train.dl, aes(poutcome)) + geom_bar(aes(x = poutcome, fill = y)) + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$poutcome))*100,1)
 ggplot(train.dl, aes(contact)) + geom_bar(aes(x = contact, fill = y)) + theme(text = element_text(size=10))
 round(prop.table(table(train.dl$contact))*100,1)
-
-
+ggplot(train.dl, aes(month))+ geom_bar(aes(x = month, fill = y)) + theme(text = element_text(size=10))
+round(prop.table(table(train.dl$month))*100,1)
 
 
 ###Logistic 
@@ -126,18 +112,19 @@ round(prop.table(table(train.dl$contact))*100,1)
 lr.df <- train.dl
 head(lr.df)
 summary(lr.df)
+
+# Xóa giá trị đa cọng 
 ##tạo các cột giả (nhị phân) từ các cột kiểu ký tự
-library(fastDummies)
+# library(fastDummies)
 
 lr.df = dummy_cols(lr.df, select_columns = c("job","marital","education","contact","month","poutcome"))
 head(lr.df)
 #options(max.print=5000)
-str(lr.df)
 
 #Xoa cot chu Dl 
-lr.df <- lr.df[,-c(2,3,4,9,11,16,18,24,27,29,30,40,47)]
+lr.df <- lr.df[,-c(2,3,4,9,11,16,18,24,27,29,30,40,47,6,10,13,14)]
 head(lr.df)
-
+str(lr.df)
 #đổi DL
 lr.df$default=ifelse(lr.df$default=='yes',1,0)
 lr.df$housing=ifelse(lr.df$housing=='yes',1,0)
@@ -146,17 +133,8 @@ lr.df$y = ifelse(lr.df$y == 'yes', 1, 0)
 str(lr.df)
 
 #chia bo mau 
-library(caTools)
-library(InformationValue)
+
 set.seed(8)
-#assignment <- sample(0:1, size= nrow(lr.df), prob = c(0.75,0.25), replace = TRUE)
-#train.set <- lr.df[assignment == 0, ]
-#test.set <- lr.df[assignment == 1, ]
-
-#split=sample.split(lr.df$y,SplitRatio=0.75)
-#train.set=subset(lr.df,split==TRUE)
-#test.set=subset(lr.df,split==FALSE)
-
 train.size = floor(0.75*nrow(lr.df))
 train.index = sample(1:nrow(lr.df), train.size)
 train.set = lr.df[train.index,]
@@ -164,16 +142,50 @@ test.set = lr.df[-train.index,]
 
 ##library(dplyr)
 ##library(magrittr)
-library(dplyr)
-library(magrittr)
 train.set %>%
   summarise(Total = n())
 test.set %>%
   summarise(Total = n())
 
 
-####Build Logit Models and Predict 
-#mô hình hồi quy Logistic trên tất cả các biến 
+# Đơn biến: Xét biến loan 
+logit_don =glm(y ~ housing, data = train.set,family = binomial(link = "logit"))
+summary(logit_don)
+# Mô hình có giá trị thống kê 
+# dụ báo 
+Prediction_train_don = predict(logit_don, newdata =  train.set, type = "response")
+summary(Prediction_train_don)
+Prediction_don  = predict(logit_don, newdata =  test.set, type = "response")
+summary(Prediction_don)
+
+# mức cắt dự đoán tối uu cho mô hình
+optCutOff <- optimalCutoff(test.set$y, Prediction_don)[1] 
+print(optCutOff)
+
+misClassError(test.set$y, Prediction_don, threshold = optCutOff)
+
+#xét sụ phù hợp
+Concordance(test.set$y, Prediction_don)
+
+# tính toán độ nhạy 
+sensitivity(test.set$y, Prediction_don, threshold = optCutOff)
+
+# tính toán độ đặc hiệu 
+specificity(test.set$y, Prediction_don, threshold = optCutOff)
+
+# xây dựng ma trận nhầm lẫn 
+confusionMatrix(test.set$y,Prediction_don, threshold = optCutOff)
+# Độ chính xác của mô hình
+(5714+848)/nrow(test.set)
+# Độ chính xác của mô hình co so 
+(5714+515)/nrow(test.set)
+
+#vẽ ROC
+plotROC(test.set$y, Prediction_don)
+
+
+ 
+#mô hình hồi quy đa biến Logistic trên tất cả các biến 
 
 #xây dựng mô hình dựu báo trên bộ mẫu train.set
 logit_reg =glm(y ~ ., data = train.set,family = binomial(link = "logit"))
@@ -186,28 +198,19 @@ summary(Prediction_train)
 Prediction = predict(logit_reg, newdata =  test.set, type = "response")
 summary(Prediction)
 
-
-
 # mức cắt dự đoán tối uu cho mô hình
-library(InformationValue)
+
 optCutOff <- optimalCutoff(test.set$y, Prediction)[1] 
 print(optCutOff)
 
 ##Model Diagnostics
 #tính toán tổng tỷ lệ lỗi phân loại sai
 misClassError(test.set$y, Prediction, threshold = optCutOff)
-
 #ROC 
-library(ROCR)
-library(InformationValue)
+# library(ROCR)
+# library(InformationValue)
 #vẽ ROC
 plotROC(test.set$y, Prediction)
-
-
-#library(GGally)
-#ggcoef(logit_reg,exponentiate=T,exclude_intercept=T,vline_color="red",errorbar_color="blue",errorbar_height=0.10)
-#plot(ggcoef)
-
 #xét sụ phù hợp
 Concordance(test.set$y, Prediction)
 
@@ -226,8 +229,8 @@ truth <- factor(rep(lvs, times = c(9940, 1363)),
                 levels = rev(lvs))
 pred <- factor(
   c(
-    rep(lvs, times = c(9591, 349)),
-    rep(lvs, times = c(774, 589))),
+    rep(lvs, times = c(9596 , 344 )),
+    rep(lvs, times = c(783, 580))),
   levels = rev(lvs))
 
 caret::confusionMatrix(pred, truth)
@@ -242,7 +245,69 @@ plotTable <- table %>%
 ggplot(data = plotTable, mapping = aes(x = Reference, y = Prediction, fill = goodbad, alpha = prop)) +geom_tile() +
   geom_text(aes(label = Freq), vjust = .5, fontface  = "bold", alpha = 1,size = 10) + scale_fill_manual(values = c(good = "forestgreen", bad = "firebrick1")) +
   theme_bw() +xlim(rev(levels(table$Reference))) +theme(text = element_text(size=10)) +xlab("True Value")
+#########################
+#Machine learning
+#Decision Tree
+library(party)
+library(rpart) #decision tree
+library(rpart.plot)
+dt.df <- DL
+head(dt.df)
+dt.df <- data.frame(dt.df)
 
+set.seed(8)
+train.size = floor(0.75*nrow(dt.df))
+train.index = sample(1:nrow(dt.df), train.size)
+train.set = dt.df[train.index,]
+test.set = dt.df[-train.index,]
 
+#Xây dựng model decision tree
+model_tree <- rpart(y ~., train.set)
+rpart.plot(model_tree)
 
+# Dự báo và tính toán sai số trên mẫu kiểm định (test.set)
+# type = class dự báo là 0 hoặc 1 (không hoặc có)
+Prediction.dt = predict(model_tree, test.set,type = "class")
+table(Predicted = Prediction.dt, True = test.set$y)
+matrix_1 = table(Predicted = Prediction.dt, True = test.set$y)
+# Độ chính xác trên mẫu kiểm định
+(matrix_1[1,1] + matrix_1[2,2])/(nrow(test.set))
+# => Độ chính xác của mô hình là 89.84%
+
+#####################
+#Random Forest
+library(randomForest)
+library(caret)
+set.seed(8)
+rf.df <- DL
+head(rf.df)
+rf.df <- data.frame(rf.df)
+
+#Chia bộ mẫu train/test
+train.size = floor(0.75*nrow(rf.df))
+train.index = sample(1:nrow(rf.df), train.size)
+train.set = rf.df[train.index,]
+test.set = rf.df[-train.index,]
+y.test = rf.df[-train.index,17]
+
+#Xây dựng model randomForest
+#Sử dụng as.factor (x) trên danh sách các giá trị phân loại (list of categorical integer values)
+rf.model <- randomForest(as.factor(y) ~ ., data=train.set)
+print(rf.model)
+
+#Evaluate variable importance
+importance(rf.model)
+# => Dựa vào gini, gini càng lớn thì biến đó càng quan trọng, biến quan trọng nhất là duration, tiếp đến là balance, age, day, month,...
+# Vẽ biểu đồ đánh giá các biến độc lập
+varImpPlot(rf.model,cex = 1)
+
+#Dự báo mô hình
+Prediction.rf = predict(rf.model, data = test.set, type = "class")
+
+#Ma trận hỗn loạn
+table(Predicted = Prediction.rf, True = test.set$y)
+matrix_1 = table(Predicted = Prediction.rf, True = test.set$y)
+
+#Độ chính xác trên mẫu kiểm định
+(matrix_1[1,1] + matrix_1[2,2])/(nrow(test.set))
 
