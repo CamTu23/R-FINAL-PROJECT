@@ -73,7 +73,6 @@ summary(train.dl$pdays)
 ggplot(data = train.dl, aes(previous, color = y))+ geom_freqpoly(binwidth = 100, size = 1)
 summary(train.dl$previous)
 
-
 # Correlation matrix
 cordata = train.dl[,c("age","balance","day","duration","campaign","pdays","previous")]
 # Plot
@@ -147,7 +146,6 @@ train.set %>%
 test.set %>%
   summarise(Total = n())
 
-
 # Đơn biến: Xét biến loan 
 logit_don =glm(y ~ housing, data = train.set,family = binomial(link = "logit"))
 summary(logit_don)
@@ -182,8 +180,6 @@ confusionMatrix(test.set$y,Prediction_don, threshold = optCutOff)
 
 #vẽ ROC
 plotROC(test.set$y, Prediction_don)
-
-
  
 #mô hình hồi quy đa biến Logistic trên tất cả các biến 
 
@@ -302,7 +298,7 @@ importance(rf.model)
 varImpPlot(rf.model,cex = 1)
 
 #Dự báo mô hình
-Prediction.rf = predict(rf.model, data = test.set, type = "class")
+Prediction.rf = predict(rf.model, newdata = test.set, type = "class")
 
 #Ma trận hỗn loạn
 table(Predicted = Prediction.rf, True = test.set$y)
