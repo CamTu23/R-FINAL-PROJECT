@@ -172,11 +172,13 @@ sensitivity(test.set$y, Prediction_don, threshold = optCutOff)
 specificity(test.set$y, Prediction_don, threshold = optCutOff)
 
 # xây dựng ma trận nhầm lẫn 
-confusionMatrix(test.set$y,Prediction_don, threshold = optCutOff)
+matrix = confusionMatrix(test.set$y,Prediction_don, threshold = optCutOff)
+(matrix[1,1] + matrix[2,2])/nrow(test.set)
+(matrix[1,1] + matrix[1,2])/nrow(test.set)
 # Độ chính xác của mô hình
-(5714+848)/nrow(test.set)
+#(5714+848)/nrow(test.set)
 # Độ chính xác của mô hình co so 
-(5714+515)/nrow(test.set)
+#(5714+515)/nrow(test.set)
 
 #vẽ ROC
 plotROC(test.set$y, Prediction_don)
